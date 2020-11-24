@@ -43,6 +43,115 @@ interface Category {
   image_url: string;
 }
 
+
+const data =
+  {
+    "foods": [
+      {
+        "id": 1,
+        "name": "Ao molho",
+        "description": "Macarrão ao molho branco, fughi e cheiro verde das montanhas.",
+        "price": 19.9,
+        "category": 1,
+        "image_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-food/food1.png",
+        "thumbnail_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-gorestaurant-mobile/ao_molho.png",
+        "extras": [
+          {
+            "id": 1,
+            "name": "Bacon",
+            "value": 1.5
+          },
+          {
+            "id": 2,
+            "name": "Frango",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Veggie",
+        "description": "Macarrão com pimentão, ervilha e ervas finas colhidas no himalaia.",
+        "price": "21.90",
+        "category": 2,
+        "image_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-food/food2.png",
+        "thumbnail_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-gorestaurant-mobile/veggie.png",
+        "extras": [
+          {
+            "id": 3,
+            "name": "Bacon",
+            "value": 1.5
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "A la Camarón",
+        "description": "Macarrão com vegetais de primeira linha e camarão dos 7 mares.",
+        "price": "25.90",
+        "category": 3,
+        "image_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-food/food3.png",
+        "thumbnail_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-gorestaurant-mobile/camarao.png",
+        "extras": [
+          {
+            "id": 4,
+            "name": "Bacon",
+            "value": 1.5
+          }
+        ]
+      }
+    ],
+    "categories": [
+      {
+        "id": 1,
+        "title": "Massas",
+        "image_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-gorestaurant-mobile/massas.png"
+      },
+      {
+        "id": 2,
+        "title": "Pizzas",
+        "image_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-gorestaurant-mobile/pizzas.png"
+      },
+      {
+        "id": 3,
+        "title": "Carnes",
+        "image_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-gorestaurant-mobile/carnes.png"
+      }
+    ],
+    "orders": [
+      {
+        "id": 1,
+        "product_id": 1,
+        "name": "Ao molho",
+        "description": "Macarrão ao molho branco, fughi e cheiro verde das montanhas.",
+        "price": 19.9,
+        "category": 1,
+        "thumbnail_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-gorestaurant-mobile/ao_molho.png",
+        "extras": [
+          {
+            "id": 4,
+            "name": "Bacon",
+            "value": 1.5,
+            "quantity": 1
+          }
+        ]
+      }
+    ],
+    "favorites": [
+      {
+        "id": 2,
+        "name": "Veggie",
+        "description": "Macarrão com pimentão, ervilha e ervas finas colhidas no himalaia.",
+        "price": "21.90",
+        "category": 2,
+        "image_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-food/food2.png",
+        "thumbnail_url": "https://storage.googleapis.com/golden-wind/bootcamp-gostack/desafio-gorestaurant-mobile/veggie.png"
+      }
+    ]
+  }
+
+
+
 const Dashboard: React.FC = () => {
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -54,27 +163,49 @@ const Dashboard: React.FC = () => {
   const navigation = useNavigation();
 
   async function handleNavigate(id: number): Promise<void> {
-    // Navigate do ProductDetails page
+    navigation.navigate('FoodDetails', {
+      id,
+    })
   }
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
-      // Load Foods from API
+   const response = await api.get('/foods', {
+     params: {
+       category_like: selectedCategory,
+       name_like: searchValue
+     }
+   });
+     setFoods(response.data.map((food:Food) => ({
+         ...food,
+         formatted: formatValue(food.price)
+     })))
     }
+
+
+    console.log(searchValue);
+
 
     loadFoods();
   }, [selectedCategory, searchValue]);
 
   useEffect(() => {
     async function loadCategories(): Promise<void> {
-      // Load categories from API
+      const response = await api.get('/categories');
+      setCategories(response.data)
     }
+
 
     loadCategories();
   }, []);
 
   function handleSelectCategory(id: number): void {
-    // Select / deselect category
+    if(selectedCategory === id) {
+      setSelectedCategory(undefined);
+    } else {
+      setSelectedCategory(id);
+    }
+
   }
 
   return (
